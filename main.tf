@@ -104,14 +104,6 @@ data "aws_ami" "latest-amazon-linux-image" {
   }
 }
 
-output "ec2_public_ip" {
-  value = aws_instance.myapp-server.public_ip
-}
-
-output "aws_ami_id" {
-  value = data.aws_ami.latest-amazon-linux-image.id
-}
-
 resource "aws_key_pair" "ssh-key" {
   key_name   = "server-key"
   public_key = file(var.my_public_key_location)
@@ -128,11 +120,34 @@ resource "aws_instance" "myapp-server" {
   associate_public_ip_address = true
   key_name = aws_key_pair.ssh-key.key_name
 
-  user_data = "${file("user-script.sh")}"
+  # user_data = "${file("user-script.sh")}"
+
+    connection {
+    type = "ssh"
+    host =self.public_ip
+    user = "ec2-user"
+    private_key = file(var.private_key_location)
+  }
+
+  provisioner "remote-exec" {
+    inline = [ 
+      "export ENV=dev",
+      "mkdir newdir"
+     ]
+  
+  }
 
     tags = {
     Name = "${var.env_prefix}-server"
     foo = "bar"
   }
 
+}
+
+output "ec2_public_ip" {
+  value = aws_instance.myapp-server.public_ip
+}
+
+output "aws_ami_id" {
+  value = data.aws_ami.latest-amazon-linux-image.id
 }
