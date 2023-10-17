@@ -10,3 +10,12 @@
 # tfvar file
 
 *.tfvars
+
+# ignore cli configuration files
+
+.terraformrc
+terraform.rc
+
+# ignore crash logs
+
+crash.log
